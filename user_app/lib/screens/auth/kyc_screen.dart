@@ -144,7 +144,7 @@ class _KycScreenState extends State<KycScreen> {
                         ),
                         const SizedBox(height: 20),
                         DropdownButtonFormField<String>(
-                          value: _selectedState,
+                          initialValue: _selectedState,
                           decoration: const InputDecoration(
                             labelText: 'State',
                             prefixIcon: Icon(Icons.map_outlined, size: 20),
@@ -166,7 +166,7 @@ class _KycScreenState extends State<KycScreen> {
                         ),
                         const SizedBox(height: 20),
                         DropdownButtonFormField<String>(
-                          value: _selectedDistrict,
+                          initialValue: _selectedDistrict,
                           decoration: const InputDecoration(
                             labelText: 'District / City',
                             prefixIcon: Icon(Icons.location_city_outlined, size: 20),

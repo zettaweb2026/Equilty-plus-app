@@ -7,7 +7,6 @@ import '../../providers/auth_provider.dart';
 import '../../providers/profile_provider.dart';
 import '../../core/theme/app_theme.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/location_data.dart';
 
@@ -372,7 +371,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 20),
                       
                       DropdownButtonFormField<String>(
-                        value: LocationData.states.contains(_selectedState) ? _selectedState : null,
+                        initialValue: LocationData.states.contains(_selectedState) ? _selectedState : null,
                         decoration: const InputDecoration(
                           labelText: 'State',
                           prefixIcon: Icon(Icons.map_outlined, size: 20),
@@ -394,7 +393,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 20),
                       
                       DropdownButtonFormField<String>(
-                        value: LocationData.getDistrictsForState(_selectedState).contains(_selectedDistrict) ? _selectedDistrict : null,
+                        initialValue: LocationData.getDistrictsForState(_selectedState).contains(_selectedDistrict) ? _selectedDistrict : null,
                         decoration: const InputDecoration(
                           labelText: 'District / City',
                           prefixIcon: Icon(Icons.location_city_outlined, size: 20),
