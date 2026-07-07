@@ -19,8 +19,8 @@ android {
         applicationId = "com.referral.admin_app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode()
-        versionName = flutter.versionName()
+        versionCode = flutter.flutterVersionCode?.toIntOrNull() ?: 1
+        versionName = flutter.flutterVersionName
     }
 
     buildTypes {
