@@ -5,6 +5,7 @@ import '../../models/hierarchy_model.dart';
 import '../../core/theme/app_theme.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'canvas_tree_view.dart';
 
 class HierarchyScreen extends StatefulWidget {
   const HierarchyScreen({super.key});
@@ -15,6 +16,7 @@ class HierarchyScreen extends StatefulWidget {
 
 class _HierarchyScreenState extends State<HierarchyScreen> {
   final Set<String> _expandedNodeIds = {};
+  bool _isTreeView = false;
 
   @override
   void initState() {
@@ -138,6 +140,18 @@ class _HierarchyScreenState extends State<HierarchyScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Network Hierarchy Tree'),
+        actions: [
+          if (!hierarchyProvider.isLoading && hierarchyProvider.hierarchyTree.isNotEmpty)
+            IconButton(
+              icon: Icon(_isTreeView ? Icons.list : Icons.bubble_chart_outlined),
+              tooltip: _isTreeView ? 'List View' : 'Tree Canvas',
+              onPressed: () {
+                setState(() {
+                  _isTreeView = !_isTreeView;
+                });
+              },
+            ),
+        ],
       ),
       body: Container(
         decoration: AppTheme.bgGradient,
@@ -175,18 +189,23 @@ class _HierarchyScreenState extends State<HierarchyScreen> {
                       ],
                     ),
                   )
-                : RefreshIndicator(
-                    onRefresh: () => hierarchyProvider.fetchHierarchy(),
-                    color: AppTheme.primaryPurple,
-                    child: ListView.builder(
-                      padding: const EdgeInsets.all(20.0),
-                      itemCount: hierarchyProvider.hierarchyTree.length,
-                      itemBuilder: (context, index) {
-                        final rootNode = hierarchyProvider.hierarchyTree[index];
-                        return _buildNodeCard(rootNode);
-                      },
-                    ),
-                  ),
+                : _isTreeView
+                    ? CanvasTreeView(
+                        tree: hierarchyProvider.hierarchyTree,
+                        onNodeTap: _showUserDetailsDialog,
+                      )
+                    : RefreshIndicator(
+                        onRefresh: () => hierarchyProvider.fetchHierarchy(),
+                        color: AppTheme.primaryPurple,
+                        child: ListView.builder(
+                          padding: const EdgeInsets.all(20.0),
+                          itemCount: hierarchyProvider.hierarchyTree.length,
+                          itemBuilder: (context, index) {
+                            final rootNode = hierarchyProvider.hierarchyTree[index];
+                            return _buildNodeCard(rootNode);
+                          },
+                        ),
+                      ),
       ),
     );
   }

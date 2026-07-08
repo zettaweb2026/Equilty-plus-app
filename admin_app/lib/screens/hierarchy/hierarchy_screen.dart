@@ -5,6 +5,7 @@ import '../../models/hierarchy_model.dart';
 import '../../core/theme/app_theme.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'canvas_tree_view.dart';
 
 class HierarchyScreen extends StatefulWidget {
   const HierarchyScreen({super.key});
@@ -20,6 +21,7 @@ class _HierarchyScreenState extends State<HierarchyScreen> {
 
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
+  bool _isTreeView = false;
 
   @override
   void initState() {
@@ -610,7 +612,7 @@ class _HierarchyScreenState extends State<HierarchyScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('System Referral Map'),
-        leading: _history.isNotEmpty && _searchQuery.isEmpty
+        leading: _history.isNotEmpty && _searchQuery.isEmpty && !_isTreeView
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () {
@@ -621,31 +623,30 @@ class _HierarchyScreenState extends State<HierarchyScreen> {
                 },
               )
             : null,
+        actions: [
+          if (!hierarchy.isLoading && globalTree.isNotEmpty)
+            IconButton(
+              icon: Icon(_isTreeView ? Icons.list : Icons.bubble_chart_outlined),
+              tooltip: _isTreeView ? 'List View' : 'Tree Canvas',
+              onPressed: () {
+                setState(() {
+                  _isTreeView = !_isTreeView;
+                });
+              },
+            ),
+        ],
       ),
       body: Container(
         decoration: AppTheme.bgGradient,
         child: hierarchy.isLoading
             ? const Center(child: SpinKitFoldingCube(color: AppTheme.primaryPurple))
-            : globalTree.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.account_tree_outlined, size: 80, color: AppTheme.softGrey),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No Tree Nodes',
-                          style: GoogleFonts.outfit(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.lightText,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : Column(
-                    children: [
+                : _isTreeView
+                    ? CanvasTreeView(
+                        tree: globalTree,
+                        onNodeTap: _showUserDetailsDialog,
+                      )
+                    : Column(
+                        children: [
                       // Search Bar
                       Padding(
                         padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
