@@ -128,7 +128,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   Text(
-                    'Join the referral loop network today',
+                    'Join the Vridhi Network today',
                     style: GoogleFonts.outfit(
                       fontSize: 14,
                       color: AppTheme.softGrey,

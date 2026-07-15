@@ -1,5 +1,8 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:image/image.dart' as img;
 import '../../providers/admin_settings_provider.dart';
 import '../../core/theme/app_theme.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -71,6 +74,144 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _campaignImageController.dispose();
     _campaignRedirectController.dispose();
     super.dispose();
+  }
+
+  Future<Uint8List?> _compressImage(Uint8List originalBytes) async {
+    try {
+      img.Image? decoded = img.decodeImage(originalBytes);
+      if (decoded == null) return null;
+
+      if (decoded.width > 800 || decoded.height > 800) {
+        decoded = img.copyResize(decoded, width: 800);
+      }
+
+      int quality = 80;
+      Uint8List compressed = Uint8List.fromList(img.encodeJpg(decoded, quality: quality));
+
+      while (compressed.lengthInBytes > 100 * 1024 && quality > 15) {
+        quality -= 15;
+        compressed = Uint8List.fromList(img.encodeJpg(decoded, quality: quality));
+      }
+
+      debugPrint("Final compressed campaign image size: ${compressed.lengthInBytes / 1024} KB (Quality: $quality)");
+      return compressed;
+    } catch (e) {
+      debugPrint("Image compression error: $e");
+      return originalBytes;
+    }
+  }
+
+  Future<void> _pickAndUploadCampaignImage(ImageSource source) async {
+    final provider = Provider.of<AdminSettingsProvider>(context, listen: false);
+
+    try {
+      final picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (image == null) return;
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Processing and compressing campaign image... ⏳'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+
+      final Uint8List originalBytes = await image.readAsBytes();
+      final Uint8List? compressedBytes = await _compressImage(originalBytes);
+
+      if (compressedBytes == null) {
+        throw Exception("Failed to process image");
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Uploading campaign image to Cloudinary... 🚀'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+
+      final String? imageUrl = await provider.uploadCampaignImage(
+        compressedBytes,
+        'campaign_${DateTime.now().millisecondsSinceEpoch}.jpg',
+      );
+
+      if (imageUrl != null) {
+        setState(() {
+          _campaignImageController.text = imageUrl;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Campaign image uploaded successfully! 🖼️'),
+              backgroundColor: AppTheme.neonGreen,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(provider.errorMessage ?? 'Campaign image upload failed'),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showCampaignImageSourceOptions() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppTheme.cardBg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library, color: AppTheme.lightText),
+                title: Text('Gallery', style: GoogleFonts.outfit(color: AppTheme.lightText)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickAndUploadCampaignImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt, color: AppTheme.lightText),
+                title: Text('Camera', style: GoogleFonts.outfit(color: AppTheme.lightText)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickAndUploadCampaignImage(ImageSource.camera);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _save() async {
@@ -277,6 +418,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               validator: (val) => val == null || val.isEmpty ? 'Required' : null,
                             ),
                             const SizedBox(height: 16),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Container(
+                                  width: 80,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.cardBg,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: AppTheme.primaryPurple.withOpacity(0.3)),
+                                    image: _campaignImageController.text.isNotEmpty && _campaignImageController.text.startsWith('http')
+                                        ? DecorationImage(
+                                            image: NetworkImage(_campaignImageController.text),
+                                            fit: BoxFit.cover,
+                                          )
+                                        : null,
+                                  ),
+                                  child: _campaignImageController.text.isEmpty || !_campaignImageController.text.startsWith('http')
+                                      ? const Icon(Icons.image_not_supported, color: AppTheme.softGrey)
+                                      : null,
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      ElevatedButton.icon(
+                                        onPressed: _showCampaignImageSourceOptions,
+                                        icon: const Icon(Icons.cloud_upload_outlined, size: 20),
+                                        label: const Text('Pick & Upload Image'),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: AppTheme.primaryPurple,
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Supports PNG, JPG, JPEG, GIF. Uploads to Cloudinary.',
+                                        style: GoogleFonts.outfit(fontSize: 11, color: AppTheme.softGrey),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
                             TextFormField(
                               controller: _campaignImageController,
                               style: GoogleFonts.outfit(color: AppTheme.lightText),
@@ -285,6 +476,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 prefixIcon: Icon(Icons.image, color: AppTheme.neonCyan),
                               ),
                               validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                              onChanged: (val) {
+                                setState(() {});
+                              },
                             ),
                             const SizedBox(height: 16),
                             TextFormField(

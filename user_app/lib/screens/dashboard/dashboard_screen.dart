@@ -44,8 +44,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   void _shareReferralLink(String code) {
     Share.share(
-      'Join my referral network! Sign up using my code $code at: https://referral-system.com/register?ref=$code',
-      subject: 'Loop Referral System Invite',
+      'Join my Vridhi Network! Sign up using my code $code at: https://referral-system.com/register?ref=$code',
+      subject: 'Vridhi Network Invite',
     );
   }
 

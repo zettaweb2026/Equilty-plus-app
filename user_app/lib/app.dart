@@ -24,7 +24,7 @@ class ReferralApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
       ],
       child: MaterialApp(
-        title: 'Loop Referral Network',
+        title: 'Vridhi Network',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.darkTheme,
         initialRoute: AppRoutes.splash,

@@ -24,7 +24,7 @@ class AdminApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AdminHierarchyProvider()),
       ],
       child: MaterialApp(
-        title: 'Loop Admin Network',
+        title: 'Vridhi Admin',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.darkTheme,
         initialRoute: AppRoutes.splash,

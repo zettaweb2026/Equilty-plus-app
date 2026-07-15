@@ -3,6 +3,7 @@ const router = express.Router();
 const adminController = require('../../controllers/admin.controller');
 const authMiddleware = require('../../middleware/auth.middleware');
 const adminMiddleware = require('../../middleware/admin.middleware');
+const { uploadSingleImage } = require('../../middleware/upload.middleware');
 
 router.get('/stats', authMiddleware, adminMiddleware, adminController.getStats);
 router.patch('/users/:userId/approval', authMiddleware, adminMiddleware, adminController.updateUserActiveStatus);
@@ -11,5 +12,6 @@ router.get('/referrals/pending', authMiddleware, adminMiddleware, adminControlle
 router.patch('/referrals/:referralId/approve', authMiddleware, adminMiddleware, adminController.approveReferral);
 router.patch('/referrals/:referralId/reject', authMiddleware, adminMiddleware, adminController.rejectReferral);
 router.put('/settings', authMiddleware, adminMiddleware, adminController.updateSetting);
+router.post('/upload-campaign-image', authMiddleware, adminMiddleware, uploadSingleImage('image'), adminController.uploadCampaignImage);
 
 module.exports = router;

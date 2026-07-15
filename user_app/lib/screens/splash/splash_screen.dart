@@ -86,7 +86,7 @@ class _SplashScreenState extends State<SplashScreen> {
               
               // App Name with dynamic typography
               Text(
-                'LOOP',
+                'VRIDHI',
                 style: GoogleFonts.outfit(
                   fontSize: 40,
                   fontWeight: FontWeight.w900,
@@ -95,7 +95,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
               ),
               Text(
-                'REFERRAL NETWORK',
+                'NETWORK',
                 style: GoogleFonts.outfit(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,

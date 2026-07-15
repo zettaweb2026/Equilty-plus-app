@@ -162,6 +162,19 @@ class AdminController {
       next(error);
     }
   }
+
+  async uploadCampaignImage(req, res, next) {
+    try {
+      if (!req.file) {
+        return ApiResponse.error(res, 'No image file uploaded', 400);
+      }
+      const cloudinaryService = require('../services/cloudinary.service');
+      const imageUrl = await cloudinaryService.uploadImage(req.file.buffer, 'campaigns');
+      return ApiResponse.success(res, 'Campaign image uploaded successfully', { imageUrl });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new AdminController();

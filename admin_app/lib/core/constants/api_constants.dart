@@ -14,6 +14,7 @@ class ApiConstants {
   static const String pendingReferrals = '/admin/referrals/pending';
   static const String updateSetting = '/admin/settings';
   static const String getSettings = '/settings';
+  static const String uploadCampaignImage = '/admin/upload-campaign-image';
   static const String hierarchy = '/hierarchy';
   static const String referralQR = '/referrals/qr';
 

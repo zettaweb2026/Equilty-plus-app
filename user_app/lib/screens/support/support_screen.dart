@@ -53,7 +53,7 @@ class SupportScreen extends StatelessWidget {
               _buildSupportContact(
                 icon: Icons.email_outlined,
                 title: 'Email Support',
-                value: 'support@referralloop.com',
+                value: 'support@vridhinetwork.com',
                 color: AppTheme.primaryPurple,
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(

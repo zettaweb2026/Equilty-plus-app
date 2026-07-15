@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import '../constants/api_constants.dart';
 import '../storage/storage_service.dart';
 
@@ -96,6 +98,45 @@ class ApiClient {
       return _processResponse(response);
     } catch (e) {
       throw Exception('Network error: $e');
+    }
+  }
+
+  /// Upload campaign image using multipart request
+  Future<dynamic> uploadCampaignImage(Uint8List fileBytes, String fileName) async {
+    final Uri uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.uploadCampaignImage}');
+    try {
+      final request = http.MultipartRequest('POST', uri);
+      
+      // Add authentication headers
+      final token = _storage.getToken();
+      if (token != null) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
+      
+      // Infer content type from filename
+      MediaType contentType = MediaType('image', 'jpeg');
+      if (fileName.toLowerCase().endsWith('.png')) {
+        contentType = MediaType('image', 'png');
+      } else if (fileName.toLowerCase().endsWith('.gif')) {
+        contentType = MediaType('image', 'gif');
+      } else if (fileName.toLowerCase().endsWith('.webp')) {
+        contentType = MediaType('image', 'webp');
+      }
+
+      final multipartFile = http.MultipartFile.fromBytes(
+        'image', 
+        fileBytes, 
+        filename: fileName,
+        contentType: contentType,
+      );
+      request.files.add(multipartFile);
+      
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      
+      return _processResponse(response);
+    } catch (e) {
+      throw Exception('Upload network error: $e');
     }
   }
 }

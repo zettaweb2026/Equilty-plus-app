@@ -71,7 +71,7 @@ class _SplashScreenState extends State<SplashScreen> {
               const SizedBox(height: 30),
               
               Text(
-                'LOOP ADMIN',
+                'VRIDHI ADMIN',
                 style: GoogleFonts.outfit(
                   fontSize: 36,
                   fontWeight: FontWeight.w900,

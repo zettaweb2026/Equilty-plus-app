@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../core/network/api_client.dart';
 import '../core/constants/api_constants.dart';
@@ -62,6 +63,25 @@ class AdminSettingsProvider extends ChangeNotifier {
       _errorMessage = e.toString().replaceAll('Exception: ', '');
       notifyListeners();
       return false;
+    }
+  }
+
+  Future<String?> uploadCampaignImage(Uint8List bytes, String fileName) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _apiClient.uploadCampaignImage(bytes, fileName);
+      final String imageUrl = response['data']['imageUrl'];
+      _isLoading = false;
+      notifyListeners();
+      return imageUrl;
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return null;
     }
   }
 }
