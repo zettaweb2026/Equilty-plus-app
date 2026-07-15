@@ -14,6 +14,11 @@ module.exports = {
     POINTS_L3: 'points_level_3',
     MAX_DEPTH: 'max_hierarchy_depth',
     REQUIRE_APPROVAL: 'require_admin_approval',
+    CAMPAIGN_AD_TITLE: 'campaign_ad_title',
+    CAMPAIGN_AD_DESCRIPTION: 'campaign_ad_description',
+    CAMPAIGN_AD_IMAGE_URL: 'campaign_ad_image_url',
+    CAMPAIGN_AD_REDIRECT_URL: 'campaign_ad_redirect_url',
+    CAMPAIGN_AD_ENABLED: 'campaign_ad_enabled',
   },
   DEFAULT_SETTINGS: {
     points_level_1: 100,
@@ -21,5 +26,10 @@ module.exports = {
     points_level_3: 25,
     max_hierarchy_depth: 3,
     require_admin_approval: true,
+    campaign_ad_title: 'Special Equity Offer',
+    campaign_ad_description: 'Earn 2x reward points today! Check out details.',
+    campaign_ad_image_url: 'https://picsum.photos/400/250',
+    campaign_ad_redirect_url: 'https://google.com',
+    campaign_ad_enabled: true,
   },
 };

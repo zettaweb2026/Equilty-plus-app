@@ -21,6 +21,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late TextEditingController _depthController;
   bool _requireApproval = false;
 
+  late TextEditingController _campaignTitleController;
+  late TextEditingController _campaignDescController;
+  late TextEditingController _campaignImageController;
+  late TextEditingController _campaignRedirectController;
+  bool _campaignEnabled = false;
+
   @override
   void initState() {
     super.initState();
@@ -28,6 +34,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _l2Controller = TextEditingController();
     _l3Controller = TextEditingController();
     _depthController = TextEditingController();
+    _campaignTitleController = TextEditingController();
+    _campaignDescController = TextEditingController();
+    _campaignImageController = TextEditingController();
+    _campaignRedirectController = TextEditingController();
     
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final provider = Provider.of<AdminSettingsProvider>(context, listen: false);
@@ -38,9 +48,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _l2Controller.text = currentSettings['points_level_2'] ?? '50';
       _l3Controller.text = currentSettings['points_level_3'] ?? '25';
       _depthController.text = currentSettings['max_hierarchy_depth'] ?? '3';
+      _campaignTitleController.text = currentSettings['campaign_ad_title'] ?? 'Special Equity Offer';
+      _campaignDescController.text = currentSettings['campaign_ad_description'] ?? 'Earn 2x reward points today! Check out details.';
+      _campaignImageController.text = currentSettings['campaign_ad_image_url'] ?? 'https://picsum.photos/400/250';
+      _campaignRedirectController.text = currentSettings['campaign_ad_redirect_url'] ?? 'https://google.com';
       
       setState(() {
         _requireApproval = currentSettings['require_admin_approval'] == 'true';
+        _campaignEnabled = currentSettings['campaign_ad_enabled'] == 'true';
       });
     });
   }
@@ -51,6 +66,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _l2Controller.dispose();
     _l3Controller.dispose();
     _depthController.dispose();
+    _campaignTitleController.dispose();
+    _campaignDescController.dispose();
+    _campaignImageController.dispose();
+    _campaignRedirectController.dispose();
     super.dispose();
   }
 
@@ -64,9 +83,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool s3 = await provider.updateSetting('points_level_3', _l3Controller.text.trim());
     bool s4 = await provider.updateSetting('max_hierarchy_depth', _depthController.text.trim());
     bool s5 = await provider.updateSetting('require_admin_approval', _requireApproval.toString());
+    bool s6 = await provider.updateSetting('campaign_ad_title', _campaignTitleController.text.trim());
+    bool s7 = await provider.updateSetting('campaign_ad_description', _campaignDescController.text.trim());
+    bool s8 = await provider.updateSetting('campaign_ad_image_url', _campaignImageController.text.trim());
+    bool s9 = await provider.updateSetting('campaign_ad_redirect_url', _campaignRedirectController.text.trim());
+    bool s10 = await provider.updateSetting('campaign_ad_enabled', _campaignEnabled.toString());
 
     if (mounted) {
-      if (s1 && s2 && s3 && s4 && s5) {
+      if (s1 && s2 && s3 && s4 && s5 && s6 && s7 && s8 && s9 && s10) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Settings saved successfully! 🎉'), backgroundColor: AppTheme.neonGreen),
         );
@@ -192,6 +216,86 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               activeColor: AppTheme.primaryPurple,
                               contentPadding: EdgeInsets.zero,
                             )
+                          ],
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 30),
+                      
+                      Text(
+                        'FLOATING CAMPAIGN ADVERTISEMENT',
+                        style: GoogleFonts.outfit(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.softGrey,
+                          letterSpacing: 2.0,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: AppTheme.glassCardDecoration(),
+                        child: Column(
+                          children: [
+                            SwitchListTile(
+                              value: _campaignEnabled,
+                              onChanged: (val) {
+                                setState(() {
+                                  _campaignEnabled = val;
+                                });
+                              },
+                              title: Text(
+                                'Enable Floating Campaign Ad',
+                                style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.lightText),
+                              ),
+                              subtitle: Text(
+                                'Show/hide campaign ad drawer on user app dashboard.',
+                                style: GoogleFonts.outfit(fontSize: 12, color: AppTheme.softGrey),
+                              ),
+                              activeColor: AppTheme.primaryPurple,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _campaignTitleController,
+                              style: GoogleFonts.outfit(color: AppTheme.lightText),
+                              decoration: const InputDecoration(
+                                labelText: 'Ad Title',
+                                prefixIcon: Icon(Icons.title, color: AppTheme.primaryPurple),
+                              ),
+                              validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                            ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _campaignDescController,
+                              style: GoogleFonts.outfit(color: AppTheme.lightText),
+                              decoration: const InputDecoration(
+                                labelText: 'Ad Description',
+                                prefixIcon: Icon(Icons.description, color: AppTheme.primaryPink),
+                              ),
+                              validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                            ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _campaignImageController,
+                              style: GoogleFonts.outfit(color: AppTheme.lightText),
+                              decoration: const InputDecoration(
+                                labelText: 'Ad Image / Thumbnail URL',
+                                prefixIcon: Icon(Icons.image, color: AppTheme.neonCyan),
+                              ),
+                              validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                            ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _campaignRedirectController,
+                              style: GoogleFonts.outfit(color: AppTheme.lightText),
+                              decoration: const InputDecoration(
+                                labelText: 'Redirect / Website URL',
+                                prefixIcon: Icon(Icons.link, color: AppTheme.neonGreen),
+                              ),
+                              validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                            ),
                           ],
                         ),
                       ),

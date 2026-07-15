@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../repositories/referral_repository.dart';
+import '../core/network/api_client.dart';
 
 class DashboardProvider extends ChangeNotifier {
   final ReferralRepository _referralRepository = ReferralRepository();
@@ -9,6 +10,7 @@ class DashboardProvider extends ChangeNotifier {
   int _totalPoints = 0;
   String? _referralCode;
   String? _qrCodeDataUrl;
+  Map<String, String> _systemSettings = {};
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -17,6 +19,7 @@ class DashboardProvider extends ChangeNotifier {
   int get totalPoints => _totalPoints;
   String? get referralCode => _referralCode;
   String? get qrCodeDataUrl => _qrCodeDataUrl;
+  Map<String, String> get systemSettings => _systemSettings;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
@@ -37,6 +40,18 @@ class DashboardProvider extends ChangeNotifier {
         final qrInfo = await _referralRepository.getReferralQR();
         _qrCodeDataUrl = qrInfo['qrCode'];
         _referralCode = qrInfo['referralCode'];
+      }
+
+      // 3. Fetch Settings
+      try {
+        final settingsResponse = await ApiClient().get('/settings');
+        final Map<String, dynamic> settingsData = settingsResponse['data'] ?? {};
+        _systemSettings = {};
+        settingsData.forEach((key, value) {
+          _systemSettings[key] = value.toString();
+        });
+      } catch (e) {
+        debugPrint('Failed to load system settings in user_app: $e');
       }
 
       _isLoading = false;

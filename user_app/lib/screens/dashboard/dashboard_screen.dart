@@ -10,7 +10,7 @@ import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../widgets/floating_overlay_panel.dart';
+import '../../widgets/floating_campaign_ad.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -20,7 +20,6 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  OverlayStateMode _floatingMode = OverlayStateMode.closed;
   @override
   void initState() {
     super.initState();
@@ -213,60 +212,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                             
                             // Notifications button with badge
-                            Row(
+                            Stack(
                               children: [
                                 IconButton(
-                                  icon: Icon(
-                                    _floatingMode == OverlayStateMode.closed
-                                        ? Icons.picture_in_picture_alt_outlined
-                                        : Icons.featured_play_list_outlined,
-                                    size: 26,
-                                    color: AppTheme.primaryPurple,
-                                  ),
-                                  tooltip: 'Toggle Tree PiP',
-                                  onPressed: () {
-                                    setState(() {
-                                      if (_floatingMode == OverlayStateMode.closed) {
-                                        _floatingMode = OverlayStateMode.minimized;
-                                      } else {
-                                        _floatingMode = OverlayStateMode.closed;
-                                      }
-                                    });
-                                  },
+                                  icon: const Icon(Icons.notifications_outlined, size: 28),
+                                  onPressed: () => Navigator.pushNamed(context, AppRoutes.notifications),
                                 ),
-                                Stack(
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.notifications_outlined, size: 28),
-                                      onPressed: () => Navigator.pushNamed(context, AppRoutes.notifications),
-                                    ),
-                                    if (notificationProvider.unreadCount > 0)
-                                      Positioned(
-                                        right: 6,
-                                        top: 6,
-                                        child: Container(
-                                          padding: const EdgeInsets.all(4),
-                                          decoration: const BoxDecoration(
-                                            color: AppTheme.primaryPink,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          constraints: const BoxConstraints(
-                                            minWidth: 16,
-                                            minHeight: 16,
-                                          ),
-                                          child: Text(
-                                            '${notificationProvider.unreadCount}',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
+                                if (notificationProvider.unreadCount > 0)
+                                  Positioned(
+                                    right: 6,
+                                    top: 6,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: const BoxDecoration(
+                                        color: AppTheme.primaryPink,
+                                        shape: BoxShape.circle,
                                       ),
-                                  ],
-                                ),
+                                      constraints: const BoxConstraints(
+                                        minWidth: 16,
+                                        minHeight: 16,
+                                      ),
+                                      child: Text(
+                                        '${notificationProvider.unreadCount}',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ),
                               ],
                             )
                           ],
@@ -472,13 +448,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 title: 'Hierarchy Tree',
                                 subtitle: 'Downline network',
                                 color: AppTheme.neonCyan,
-                                onTap: () => Navigator.pushNamed(context, AppRoutes.hierarchy).then((result) {
-                                  if (result == 'dock') {
-                                    setState(() {
-                                      _floatingMode = OverlayStateMode.minimized;
-                                    });
-                                  }
-                                }),
+                                onTap: () => Navigator.pushNamed(context, AppRoutes.hierarchy),
                               ),
                             ),
                           ],
@@ -532,19 +502,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
             ),
           ),
-          FloatingOverlayPanel(
-            initialMode: _floatingMode,
-            onClose: () {
-              setState(() {
-                _floatingMode = OverlayStateMode.closed;
-              });
-            },
-            onModeChanged: (mode) {
-              setState(() {
-                _floatingMode = mode;
-              });
-            },
-          ),
+          const FloatingCampaignAd(),
         ],
       ),
     );
